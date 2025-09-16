@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Student Reservation Calendar (Bootstrap Minimal)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FullCalendar -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <style>
+    /* 尽量少用CSS，仅做必要微调 */
+    .fc .fc-timegrid-slot {
+      height: 28px;
+    }
+
+    /* 行高更紧凑 */
+    .fc {
+      --fc-border-color: rgba(0, 0, 0, .06);
+    }
+
+    .fc .fc-day-today {
+      background: rgba(13, 110, 253, .06);
+    }
+
+    /* 今日淡蓝底 */
+  </style>
+</head>
+
+<body class="bg-light">
+  <div id="nav-container"></div>
+
+  <div class="container py-4" " style="margin-top:140px;">
+    <div class="d-flex align-items-end justify-content-between mb-3">
+      <div>
+        <h3 class="mb-1">📅 2025 Semester 1</h3>
+        <div class="text-muted small">Use the controls to navigate and switch views</div>
+      </div>
+
+      <!-- 视图切换（Bootstrap segmented control） -->
+      <div class="btn-group" role="group" aria-label="View switch">
+        <input type="radio" class="btn-check" name="view" id="view-week" autocomplete="off" checked>
+        <label class="btn btn-outline-primary" for="view-week">Week</label>
+
+        <input type="radio" class="btn-check" name="view" id="view-month" autocomplete="off">
+        <label class="btn btn-outline-primary" for="view-month">Month</label>
+      </div>
+    </div>
+
+    <!-- 导航栏（上一月/周、今天、下一月/周） -->
+    <div class="d-flex gap-2 align-items-center mb-3">
+      <div class="btn-group" role="group" aria-label="Navigation">
+        <button id="btn-prev" type="button" class="btn btn-outline-secondary">
+          ‹ Prev
+        </button>
+        <button id="btn-today" type="button" class="btn btn-outline-secondary">
+          Today
+        </button>
+        <button id="btn-next" type="button" class="btn btn-outline-secondary">
+          Next ›
+        </button>
+      </div>
+      <div class="ms-auto text-secondary" id="current-range"></div>
+    </div>
+
+    <!-- 日历卡片 -->
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div>
+
+          <input list="teacherList" id="teacherInput" class="form-control"
+            placeholder="Input professor name eg. HONG Xincong..." style="width: 350px;">
+          <datalist id="teacherList">
+            <option value="Mr. Smith">
+            <option value="Ms. Johnson">
+            <option value="Dr. Brown">
+            <option value="Prof. Davis">
+          </datalist>
+        </div>
+        <br>
+        <div id="calendar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 事件详情 Modal -->
+  <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="eventTitle">Event</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2">
+            <span class="badge text-bg-primary" id="eventCourse"></span>
+          </div>
+          <div class="mb-1"><strong>Time:</strong> <span id="eventTime"></span></div>
+          <div class="mb-1"><strong>ID:</strong> <span id="eventId"></span></div>
+          <div class="mb-1"><strong>Status:</strong> <span id="eventStatus"></span></div>
+
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          <button id="reserveBtn" class="btn btn-primary reserveBtn">Reserve this slot</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js"></script>
+  <script>
+    $(function () {
+      $("#nav-container").load("StudentMenu.html", function (response, status, xhr) {
+        if (status == "error") {
+          console.error("載入 StudentMenu.html 失敗:", xhr.status, xhr.statusText);
+        }
+      });
+      let calendar = null;
+
+      // 封装渲染日历的函数
+      function renderCalendar(teacherId) {
+        if (calendar) {
+          calendar.destroy(); // 先销毁旧的
+        }
+
+        calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
+          locale: 'en',
+          initialView: 'timeGridWeek',
+          headerToolbar: false,
+          firstDay: 1,
+          height: 'auto',
+          slotMinTime: '08:30:00',
+          slotMaxTime: '22:30:00',
+          nowIndicator: true,
+          navLinks: true,
+          selectable: true,
+          selectMirror: true,
+
+          events: {
+            url: '/api/getTimeSlot',
+            method: 'GET',
+            extraParams: { teacher_id: teacherId },
+            failure: function () {
+              alert('Failed to load time slots.');
+            }
+          },
+
+          // ✅ 点击事件 → 打开 Modal
+          eventClick: function (info) {
+            const ev = info.event;
+            if (ev.extendedProps?.canBook === false) {
+              console.log("❌ Slot not bookable:", ev.id);
+              return; // 不触发 Modal
+            }
+
+            $("#eventTitle").text(ev.title);
+            $("#eventCourse").text(ev.title.split(" - ")[0] || "Course");
+            $("#eventId").text(ev.id);
+            $("#eventStatus").text(ev.extendedProps?.status ?? "");
+            $("#reserveBtn").val(ev.id);
+
+            const fmt = (d) => d.toLocaleString('en-US', {
+              dateStyle: 'medium',
+              timeStyle: 'short',
+              hour12: true
+            });
+            $("#eventTime").text(`${fmt(ev.start)} – ${fmt(ev.end)}`);
+
+            // ✅ 打开 Modal
+            const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+            modal.show();
+          }
+        });
+
+        calendar.render();
+      }
+
+
+      // 1. 加载老师列表
+      $.getJSON("/api/getTeachersNameList", function (data) {
+        let options = "";
+        data.forEach(t => {
+          options += `<option value="${t.name}" data-teacher_id="${t.id}"></option>`;
+        });
+        $("#teacherList").html(options);
+      });
+
+      // 2. 监听输入框变化
+      $("#teacherInput").on("change", function () {
+        const inputVal = $(this).val().trim();
+        const selectedOption = $("#teacherList option").filter(function () {
+          return this.value === inputVal;
+        });
+
+        const teacherId = selectedOption.data("teacher_id");
+
+        if (!teacherId) {
+          if (calendar) {
+            calendar.destroy();
+            calendar = null;
+          }
+          $("#calendar").html("<div class='text-muted'>Please choose a teacher to see the calendar.</div>");
+          return;
+        }
+
+        // ✅ 调用渲染函数
+        renderCalendar(teacherId);
+      });
+
+      // 更新日历范围文字
+      function updateRangeText() {
+        if (!calendar) return;
+        const view = calendar.view;
+        const fmt = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' });
+        $("#current-range").text(
+          view.type === 'dayGridMonth'
+            ? fmt.format(view.currentStart)
+            : `${fmt.format(view.currentStart)} – ${fmt.format(view.currentEnd)}`
+        );
+      }
+
+      // 绑定导航按钮
+      $("#btn-prev").on("click", function () {
+        if (calendar) {
+          calendar.prev();
+          updateRangeText();
+        }
+      });
+
+      $("#btn-next").on("click", function () {
+        if (calendar) {
+          calendar.next();
+          updateRangeText();
+        }
+      });
+
+      $("#btn-today").on("click", function () {
+        if (calendar) {
+          calendar.today();
+          updateRangeText();
+        }
+      });
+
+      // 点击 Reserve 按钮
+      $(".reserveBtn").on("click", function () {
+        const timeSlotId = $(this).val(); // 从按钮取 id
+
+        $.ajax({
+          url: "/api/reserveTimeSlot",
+          method: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({ time_slot_id: timeSlotId }), // ✅ 直接对象，不是数组
+          success: function (resp) {
+            console.log("✅ Reservation success:", resp);
+            alert("Reservation success!\n" + JSON.stringify(resp, null, 2));
+          },
+          error: function (xhr) {
+            console.error("❌ Reservation failed:", xhr.responseText);
+            alert("Reservation failed!");
+          }
+        });
+      });
+
+
+
+
+
+      // 打印出来调试
+
+
+
+    });
+
+
+  </script>
+
+
+
+</body>
+
+</html>

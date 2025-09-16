@@ -1,0 +1,61 @@
+<!-- nav.html -->
+<nav class="navbar navbar-expand-lg navbar-modern fixed-top py-3">
+  <div class="container">
+    <!-- Brand -->
+    <a class="navbar-brand" href="index.html">PolyU Capstone</a>
+
+    <!-- Mobile Toggler -->
+    <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Menu -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        <li class="nav-item"><a class="nav-link active" href="createTimeSlot.html">Create Time Slot</a></li>
+        <li class="nav-item"><a class="nav-link" href="ViewTimeSlotList.html">View Time Slot</a></li>
+        <li class="nav-item"><a class="nav-link" href="projects.html">Projects</a></li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .navbar-modern {
+    background: linear-gradient(90deg, #d90429 0%, #9d0b0b 100%);
+    transition: all 0.3s ease;
+    z-index: 9999; /* 確保最高層 */
+  }
+  .navbar.shrink {
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+    background: rgba(157, 11, 11, 0.95);
+    backdrop-filter: blur(8px);
+  }
+  .navbar-brand {
+    font-weight: 700;
+    color: #fff !important;
+    letter-spacing: 0.5px;
+  }
+  .navbar-modern .nav-link {
+    color: #fff !important;
+    font-weight: 500;
+    position: relative;
+    margin: 0 8px;
+  }
+  .navbar-modern .nav-link::after {
+    content: "";
+    position: absolute;
+    width: 0%;
+    height: 2px;
+    left: 0;
+    bottom: -4px;
+    background-color: #fff;
+    transition: width 0.3s ease;
+  }
+  .navbar-modern .nav-link:hover::after {
+    width: 100%;
+  }
+</style>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Teacher Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FullCalendar -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        /* FullCalendar 调整 */
+        .fc .fc-timegrid-slot {
+            height: 28px;
+        }
+
+        .fc {
+            --fc-border-color: rgba(0, 0, 0, .06);
+        }
+
+        .fc .fc-day-today {
+            background: rgba(13, 110, 253, .06);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Booking Form Modal 风格 */
+        .modal-content {
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            border-top-left-radius: 1.25rem !important;
+            border-top-right-radius: 1.25rem !important;
+            background: linear-gradient(90deg, #a6192e, #c62828);
+        }
+
+        .modal-header .modal-title,
+        .modal-header .btn-close {
+            color: #fff;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 0.75rem;
+        }
+
+        .btn {
+            border-radius: 0.75rem;
+            padding: 0.6rem 1.5rem;
+        }
+
+        .btn-primary {
+            background-color: #a6192e;
+            border-color: #a6192e;
+        }
+
+        .btn-primary:hover {
+            background-color: #8c1627;
+            border-color: #8c1627;
+        }
+
+        .btn-success {
+            background-color: #a6192e;
+            border-color: #a6192e;
+        }
+
+        .btn-success:hover {
+            background-color: #8c1627;
+            border-color: #8c1627;
+        }
+
+        .form-label i {
+            margin-right: 6px;
+            color: #a6192e;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <div id="nav-container"></div>
+
+    <div class="container py-4" style="margin-top:140px;">
+        <div class="d-flex align-items-end justify-content-between mb-3">
+            <div>
+                <h3 class="mb-1">📅 2025 Semester 1</h3>
+                <div class="text-muted small">Use the controls to navigate and switch views</div>
+            </div>
+
+            <!-- 视图切换 -->
+            <div class="btn-group" role="group" aria-label="View switch">
+                <input type="radio" class="btn-check" name="view" id="view-week" autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="view-week">Week</label>
+
+                <input type="radio" class="btn-check" name="view" id="view-month" autocomplete="off">
+                <label class="btn btn-outline-primary" for="view-month">Month</label>
+            </div>
+        </div>
+
+        <!-- 导航栏 -->
+        <div class="d-flex gap-2 align-items-center mb-3">
+            <div class="btn-group" role="group" aria-label="Navigation">
+                <button id="btn-prev" type="button" class="btn btn-outline-secondary">‹ Prev</button>
+                <button id="btn-today" type="button" class="btn btn-outline-secondary">Today</button>
+                <button id="btn-next" type="button" class="btn btn-outline-secondary">Next ›</button>
+            </div>
+
+            <!-- 打开 Booking Form -->
+            <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#bookingModal">
+                <i class="bi bi-calendar-plus"></i> Open Booking Form
+            </button>
+
+        </div>
+
+        <!-- 日历卡片 -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 事件详情 Modal -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventTitle">Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <span class="badge text-bg-primary" id="eventCourse"></span>
+                    </div>
+                    <div class="mb-1"><strong>Time:</strong> <span id="eventTime"></span></div>
+                    <div class="mb-1"><strong>ID:</strong> <span id="eventId"></span></div>
+                    <div class="mb-1"><strong>Status:</strong> <span id="eventStatus"></span></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="reserveBtn" class="btn btn-primary reserveBtn">Reserve this slot</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Form Modal -->
+    <div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <!-- Header -->
+                <div class="modal-header text-white">
+                    <h5 class="modal-title"><i class="bi bi-calendar-plus"></i> Booking Time Slot</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body p-4">
+                    <form id="timeSlotForm">
+                        <div class="row g-4">
+                            <!-- Title -->
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="bi bi-pencil-square"></i> Title</label>
+                                <input type="text" name="title" class="form-control" placeholder="Enter title" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="bi bi-check-circle"></i> Status</label>
+                                <select class="form-select" name="status">
+                                    <option value="Available">Available</option>
+                                    <option value="Unavailable">Unavailable</option>
+                                </select>
+                            </div>
+
+                            <!-- Start -->
+                            <div id="timeSlotContainer">
+                                <div class="row g-4 timeSlotRow">
+                                    <div class="col-md-6">
+                                        <label class="form-label"><i class="bi bi-clock"></i> Start Time</label>
+                                        <input type="datetime-local" name="start" class="form-control" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label"><i class="bi bi-clock-history"></i> End Time</label>
+                                        <input type="datetime-local" name="end" class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Add Button -->
+                            <div class="mt-3">
+                                <button type="button" id="addTimeSlotBtn" class="btn btn-outline-primary">
+                                    <i class="bi bi-plus-circle"></i> Add Another Time Slot
+                                </button>
+                            </div>
+
+                            <!-- Status -->
+
+
+                            <!-- Capacity -->
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="bi bi-people" name="capacity"></i> Capacity</label>
+                                <input type="number" class="form-control" placeholder="Enter capacity" name="capacity"
+                                    required>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="col-12">
+                                <label class="form-label"><i class="bi bi-file-text"></i> Content</label>
+                                <textarea class="form-control" rows="3" name="content" placeholder="Enter description"
+                                    required></textarea>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="col-12 text-center mt-3">
+                                <button type="submit" class="btn btn-success me-2">
+                                    <i class="bi bi-save"></i> Save
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js"></script>
+    <script>
+        $("#nav-container").load("TeacherMenu.html", function (response, status, xhr) {
+            if (status == "error") {
+                console.error("載入 StudentMenu.html 失敗:", xhr.status, xhr.statusText);
+            }
+        });
+        $(document).ready(function () {
+            // 格式化日期为 datetime-local 需要的格式 (YYYY-MM-DDTHH:MM)
+            function toDatetimeLocal(d) {
+                const pad = (n) => n.toString().padStart(2, "0");
+                return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            }
+
+
+
+
+            // 今天
+            const now = new Date();
+            const minDateTime = toDatetimeLocal(now);
+
+            // 七天后
+            const future = new Date();
+            future.setDate(future.getDate() + 6);
+            const maxDateTime = toDatetimeLocal(future);
+
+            // Start input
+            $("#startTime").val(minDateTime).attr("min", minDateTime).attr("max", maxDateTime);
+
+            // End input
+            $("#endTime").val(minDateTime).attr("min", minDateTime).attr("max", maxDateTime);
+
+            // ✅ 实时检测结束时间
+            $("#startTime, #endTime").on("input change", function () {
+                const startVal = new Date($("#startTime").val());
+                const endVal = new Date($("#endTime").val());
+
+                if (endVal <= startVal) {
+                    alert("endtime cannot be more than start time");
+                    // 设置 end = start + 1 小时
+                    const newEnd = new Date(startVal.getTime() + 60 * 60 * 1000);
+                    let y = newEnd.getFullYear();
+                    let m = String(newEnd.getMonth() + 1).padStart(2, '0');
+                    let d = String(newEnd.getDate()).padStart(2, '0');
+                    let hh = String(newEnd.getHours()).padStart(2, '0');
+                    let mm = String(newEnd.getMinutes()).padStart(2, '0');
+                    $("#endTime").val(`${y}-${m}-${d}T${hh}:${mm}`);
+                } else {
+                    $("#endTime")[0].setCustomValidity(""); // 清除错误
+                }
+            });
+
+            function isOverlap(start1, end1, start2, end2) {
+                return (start1 < end2 && start2 < end1);
+            }
+
+            $("#timeSlotForm").on("submit", function (e) {
+                e.preventDefault();
+
+                let starts = $("input[name='start']").map(function () { return new Date($(this).val()); }).get();
+                let ends = $("input[name='end']").map(function () { return new Date($(this).val()); }).get();
+
+                // 檢查每組開始 < 結束
+                for (let i = 0; i < starts.length; i++) {
+                    if (ends[i] <= starts[i]) {
+                        alert(`第 ${i + 1} 個時段的結束時間必須大於開始時間`);
+                        return;
+                    }
+                }
+
+                // 檢查不同 slot 是否重疊
+                for (let i = 0; i < starts.length; i++) {
+                    for (let j = i + 1; j < starts.length; j++) {
+                        if (isOverlap(starts[i], ends[i], starts[j], ends[j])) {
+                            alert(`第 ${i + 1} 個時段與第 ${j + 1} 個時段時間重疊 ❌`);
+                            return;
+                        }
+                    }
+                }
+
+                // ✅ 如果沒問題，才送 Ajax
+                $.ajax({
+                    url: "/api/createTimeSlot",
+                    type: "POST",
+                    data: $(this).serialize(),
+                    success: function (res) {
+                        alert(res.message);
+                    },
+                    error: function (xhr, status, error) {
+                        alert("保存失败 ❌: " + error);
+                    }
+                });
+            });
+
+        });
+
+        $(function () {
+            let calendar = null;
+
+            // 封装渲染日历的函数
+            function renderCalendar(teacherId) {
+                if (calendar) {
+                    calendar.destroy(); // 先销毁旧的
+                }
+
+                calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
+                    locale: 'en',
+                    initialView: 'timeGridWeek',
+                    headerToolbar: false,
+                    firstDay: 1,
+                    height: 'auto',
+                    slotMinTime: '08:30:00',
+                    slotMaxTime: '22:30:00',
+                    nowIndicator: true,
+                    navLinks: true,
+                    selectable: true,
+                    selectMirror: true,
+
+                    events: {
+                        url: '/api/getTimeSlotForTeacher',
+                        method: 'GET',
+                        extraParams: { teacher_id: teacherId },
+                        failure: function () {
+                            alert('Failed to load time slots.');
+                        }
+                    },
+
+                    // ✅ 点击事件 → 打开 Modal
+                    eventClick: function (info) {
+                        const ev = info.event;
+                        if (ev.extendedProps?.canBook === false) {
+                            //console.log("❌ Slot not bookable:", ev.id);
+                            return; // 不触发 Modal
+                        }
+
+                        $("#eventTitle").text(ev.title);
+                        $("#eventCourse").text(ev.title.split(" - ")[0] || "Course");
+                        $("#eventId").text(ev.id);
+                        $("#eventStatus").text(ev.extendedProps?.status ?? "");
+                        $("#reserveBtn").val(ev.id);
+
+                        const fmt = (d) => d.toLocaleString('en-US', {
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
+                            hour12: true
+                        });
+                        $("#eventTime").text(`${fmt(ev.start)} – ${fmt(ev.end)}`);
+
+                        // ✅ 打开 Modal
+                        const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+                        modal.show();
+                    }
+                });
+
+                calendar.render();
+            }
+
+
+            function getCookie(name) {
+                let matches = document.cookie.match(new RegExp(
+                    "(?:^|; )" + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + "=([^;]*)"
+                ));
+                return matches ? decodeURIComponent(matches[1]) : undefined;
+
+            }
+
+            // 拿到 user_id
+            let userId = getCookie("user_id");
+            console.log(userId);
+            // 调用 renderCalendar
+            if (userId) {
+                renderCalendar(userId);
+            } else {
+                console.warn("Pleast login again");
+            }
+
+
+            // 更新日历范围文字
+
+            // 绑定导航按钮
+            $("#btn-prev").on("click", function () {
+                if (calendar) {
+                    calendar.prev();
+                }
+            });
+
+            $("#btn-next").on("click", function () {
+                if (calendar) {
+                    calendar.next();
+                }
+            });
+
+            $("#btn-today").on("click", function () {
+                if (calendar) {
+                    calendar.today();
+                }
+            });
+
+            // 点击 Reserve 按钮
+            $(".reserveBtn").on("click", function () {
+                const timeSlotId = $(this).val(); // 从按钮取 id
+
+                $.ajax({
+                    url: "/api/reserveTimeSlot",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ time_slot_id: timeSlotId }), // ✅ 直接对象，不是数组
+                    success: function (resp) {
+                        console.log("✅ Reservation success:", resp);
+                        alert("Reservation success!");
+                    },
+                    error: function (xhr) {
+                        console.error("❌ Reservation failed:", xhr.responseText);
+                        alert("Reservation failed!");
+                    }
+                });
+            });
+            $("#addTimeSlotBtn").on("click", function () {
+                const newRow = `
+                        <div class="row g-4 timeSlotRow mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="bi bi-clock"></i> Start Time</label>
+                                <input type="datetime-local" name="start" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="bi bi-clock-history"></i> End Time</label>
+                                <input type="datetime-local" name="end" class="form-control" required>
+                            </div>
+                        </div>`;
+                $("#timeSlotContainer").append(newRow);
+            });
+
+
+
+
+
+
+            // 打印出来调试
+
+
+
+        });
+
+
+    </script>
+
+
+
+</body>
+
+</html>

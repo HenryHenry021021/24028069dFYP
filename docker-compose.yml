@@ -1,0 +1,52 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app
+    environment:
+      DB_USER: 24028069d
+      DB_PASS: Henry_24028069d
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: CapstoneProject24028069d
+      EMAIL_USER: 021021hxc@gmail.com
+      EMAIL_PASS: zatknjnalkvknepy   # 注意去掉空格
+      SMTP_FROM: 021021hxc@gmail.com
+      SMTP_SERVER: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_FROM_NAME: FastAPI Service
+      
+    depends_on:
+      - db
+    restart: always
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: CapstoneProject24028069d
+      MYSQL_USER: 24028069d
+      MYSQL_PASSWORD: Henry_24028069d
+      TZ: Asia/Hong_Kong 
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./db.sql:/docker-entrypoint-initdb.d/db.sql
+    restart: always
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_USER: 24028069d
+      PMA_PASSWORD: Henry_24028069d
+    ports:
+      - "8081:80"
+    restart: always
