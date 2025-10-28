@@ -13,14 +13,17 @@
     <!-- Menu -->
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto align-items-lg-center">
-        <li class="nav-item"><a class="nav-link active" href="studentHome.html">Make Booking</a></li>
+        <li class="nav-item"><a class="nav-link active" href="studentViewBookingGroup.html">Make Booking</a></li>
         <li class="nav-item"><a class="nav-link" href="MyCommingBooking.html">My Comming Booking</a></li>
-        <li class="nav-item"><a class="nav-link" href="projects.html">Projects</a></li>
+        <li class="nav-item">
+          <a class="nav-link" href="../index.html" id="logoutBtn">Log out</a>
+        </li>
         
       </ul>
     </div>
   </div>
 </nav>
+<script src="/static/views/Student/function/checkPagePermission.js"></script>
 
 <style>
   .navbar-modern {
@@ -59,3 +62,23 @@
     width: 100%;
   }
 </style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $("#logoutBtn").on("click", function (e) {
+    e.preventDefault(); 
+
+    $.ajax({
+      url: "/api/clearCookies",
+      type: "GET",
+      xhrFields: { withCredentials: true }, // 帶上 cookie
+      success: function (res) {
+        window.location.href = window.location.origin + "/";
+      },
+      error: function (err) {
+        console.error("Logout failed:", err);
+        window.location.href = window.location.origin + "/";
+
+      }
+    });
+  });
+</script>

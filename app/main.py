@@ -10,6 +10,11 @@ from app.views.Student.function.getTimeSlot import router as timeslot_router
 from app.views.Student.function.getTeachersNameList import router as getTeachersNameList_router
 from app.views.Student.function.reserveTimeSlot import router as reserveTimeSlot_router
 from app.views.Student.function.myUpcomingBookings import router as myUpcomingBookings_router
+from app.views.Student.function.getTimeslotGroup import router as getTimeslotGroup_router
+from app.views.Student.function.cancelBooking import router as cancelBooking_router
+from fastapi import WebSocket
+from app.websocket_manager import connect_client, disconnect_client
+from app.clearCookies import router as clearCookies_router
 
 
 from app.views.Teacher.function.getTimeSlotForTeacher import router as getTimeSlotForTeacher_router
@@ -24,6 +29,11 @@ app = FastAPI()
 app.include_router(timeslot_router, prefix="/api")
 app.include_router(getTeachersNameList_router, prefix="/api")
 app.include_router(myUpcomingBookings_router, prefix="/api")
+app.include_router(getTimeslotGroup_router, prefix="/api")
+app.include_router(cancelBooking_router, prefix="/api")
+app.include_router(clearCookies_router, prefix="/api")
+
+
 
 app.include_router(reserveTimeSlot_router, prefix="/api")
 app.include_router(getTimeSlotForTeacher_router, prefix="/api")
@@ -87,3 +97,13 @@ async def check_login(
     if "error" in result:
      return JSONResponse(content=result, status_code=200)  # ⬅️ 这里是 400
     return result
+
+@app.websocket("/ws")
+async def websocket_endpoint(ws: WebSocket):
+    await connect_client(ws)
+    try:
+        while True:
+            data = await ws.receive_text()
+            print("收到:", data)
+    except:
+        await disconnect_client(ws)

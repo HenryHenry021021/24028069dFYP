@@ -7,19 +7,379 @@
   <title>Time Slots</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f8fafc;
+      color: #334155;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+    }
+
+    /* Header Section */
+    .page-header {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+    }
+
+    .page-subtitle {
+      color: #64748b;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Filter Section */
+    .filter-section {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+    }
+
+    .filter-label {
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .form-control {
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Group Header */
+    .group-header {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .group-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .group-badge {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    /* Slots Grid */
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    /* Slot Cards */
+    .slot-card {
+      transition: all 0.3s ease;
+      animation: fadeInUp 0.6s ease forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .slot-card:nth-child(1) { animation-delay: 0.1s; }
+    .slot-card:nth-child(2) { animation-delay: 0.2s; }
+    .slot-card:nth-child(3) { animation-delay: 0.3s; }
+    .slot-card:nth-child(4) { animation-delay: 0.4s; }
+    .slot-card:nth-child(5) { animation-delay: 0.5s; }
+    .slot-card:nth-child(6) { animation-delay: 0.6s; }
+
+    .slot-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .card {
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      background: white;
+      height: 100%;
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-title i {
+      color: #3b82f6;
+    }
+
+    /* Slot Info */
+    .slot-info {
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+
+    .slot-info-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    .slot-info-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .slot-info-item i {
+      width: 16px;
+      color: #3b82f6;
+      text-align: center;
+    }
+
+    .slot-info-label {
+      font-weight: 500;
+      color: #374151;
+      min-width: 80px;
+    }
+
+    .slot-info-value {
+      color: #64748b;
+    }
+
+    /* Action Button */
+    .btn-view-students {
+      background: #3b82f6;
+      border: none;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      margin-top: auto;
+    }
+
+    .btn-view-students:hover {
+      background: #2563eb;
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #64748b;
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      color: #cbd5e1;
+      margin-bottom: 1.5rem;
+    }
+
+    .empty-state-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state-text {
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    /* Loading State */
+    .loading-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #64748b;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .page-header {
+        padding: 1.5rem;
+      }
+      
+      .page-title {
+        font-size: 1.5rem;
+      }
+      
+      .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start !important;
+      }
+      
+      .filter-section {
+        padding: 1rem;
+      }
+      
+      .group-header {
+        padding: 1rem;
+      }
+      
+      .card-body {
+        padding: 1rem;
+      }
+
+      .slots-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+
+    @media (max-width: 1200px) and (min-width: 769px) {
+      .slots-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      }
+    }
+  </style>
 </head>
 
-<body class="bg-light">
-
+<body>
   <div id="nav-container"></div>
 
   <div class="container py-4" style="margin-top:120px;">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h3 class="mb-0"><i class="fa-solid fa-clock text-danger me-2"></i> Time Slots</h3>
-      <input type="date" id="dateFilter" class="form-control w-auto">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div>
+          <h1 class="page-title">
+            <i class="fas fa-clock me-2"></i>
+            Time Slots
+          </h1>
+          <p class="page-subtitle">Manage and view all your scheduled time slots</p>
+        </div>
+      </div>
     </div>
-    <div class="row g-4" id="slotContainer"></div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <div class="row align-items-end">
+        <div class="col-md-4">
+          <label class="filter-label">
+            <i class="fas fa-calendar-alt me-2"></i>
+            Filter by Date
+          </label>
+          <input type="date" id="dateFilter" class="form-control">
+        </div>
+        <div class="col-md-8">
+          <div class="text-muted small">
+            <i class="fas fa-info-circle me-1"></i>
+            Select a date to filter time slots, or leave empty to show all
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slots Container -->
+    <div id="slotContainer"></div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="loading-state" style="display: none;">
+      <div class="loading-spinner"></div>
+      <div>Loading time slots...</div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <div class="empty-state-icon">
+        <i class="fas fa-calendar-times"></i>
+      </div>
+      <div class="empty-state-title">No Time Slots Found</div>
+      <div class="empty-state-text">Create your first time slot to get started</div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -27,43 +387,80 @@
     // 動態渲染分組卡片
     function renderSlots(groups) {
       const container = $("#slotContainer");
+      const loadingState = $("#loadingState");
+      const emptyState = $("#emptyState");
+      
+      // Hide loading state
+      loadingState.hide();
+      
       container.empty(); // 清空
+
+      if (!groups || groups.length === 0) {
+        emptyState.show();
+        return;
+      }
+
+      emptyState.hide();
 
       groups.forEach(group => {
         // 每個 groupId 加個標題
         container.append(`
-        <div class="col-12">
-          <h4 class="text-primary mb-3">Group: ${group.timeSlotGroupId}</h4>
-        </div>
-      `);
+          <div class="group-header">
+            <h2 class="group-title">
+              <i class="fas fa-layer-group"></i>
+              Group ${group.timeSlotGroupId}
+              <span class="group-badge">${group.slots.length} slots</span>
+            </h2>
+          </div>
+        `);
+
+        // 創建網格容器
+        const gridContainer = $('<div class="slots-grid"></div>');
+        container.append(gridContainer);
 
         // 渲染這個 group 底下的 slots
         group.slots.forEach(slot => {
           const card = `
-          <div class="col-md-6 col-lg-4 slot-card" data-date="${slot.date}">
-            <div class="card shadow-sm h-100">
-              <div class="card-body">
-                <h5 class="card-title text-danger">${slot.title}</h5>
-                <p><i class="fa-regular fa-calendar me-2 text-secondary"></i>
-                  <strong>Start:</strong> ${slot.start}
-                </p>
-                <p><i class="fa-regular fa-calendar-check me-2 text-secondary"></i>
-                  <strong>End:</strong> ${slot.end}
-                </p>
-                <p><i class="fa-solid fa-book-open me-2 text-secondary"></i>
-                  <strong>Content:</strong> ${slot.content}
-                </p>
-                <p><i class="fa-solid fa-users me-2 text-secondary"></i>
-                  <strong>Capacity:</strong> ${slot.capacity}
-                </p>
-                <a href="ViewStudentList.html?id=${slot.id}" class="btn btn-outline-danger btn-sm w-100">
-                  <i class="fa-solid fa-users"></i> View Students
-                </a>
+            <div class="slot-card" data-date="${slot.date}">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">
+                    <i class="fas fa-calendar-check"></i>
+                    ${slot.title}
+                  </h5>
+                  
+                  <div class="slot-info">
+                    <div class="slot-info-item">
+                      <i class="fas fa-play"></i>
+                      <span class="slot-info-label">Start:</span>
+                      <span class="slot-info-value">${slot.start}</span>
+                    </div>
+                    <div class="slot-info-item">
+                      <i class="fas fa-stop"></i>
+                      <span class="slot-info-label">End:</span>
+                      <span class="slot-info-value">${slot.end}</span>
+                    </div>
+                    <div class="slot-info-item">
+                      <i class="fas fa-book-open"></i>
+                      <span class="slot-info-label">Content:</span>
+                      <span class="slot-info-value">${slot.content}</span>
+                    </div>
+                    <div class="slot-info-item">
+                      <i class="fas fa-users"></i>
+                      <span class="slot-info-label">Capacity:</span>
+                      <span class="slot-info-value">${slot.capacity}</span>
+                    </div>
+                  </div>
+                  
+                  <a href="ViewStudentList.html?id=${slot.id}" class="btn-view-students">
+                    <i class="fas fa-users"></i>
+                    View Students
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
-        `;
-          container.append(card);
+          `;
+          gridContainer.append(card);
         });
       });
     }
@@ -71,6 +468,9 @@
     $(document).ready(function () {
       // 載入 TeacherMenu.html
       $("#nav-container").load("TeacherMenu.html");
+
+      // Show loading state
+      $("#loadingState").show();
 
       // 拉取後端 API 資料
       $.ajax({
@@ -81,6 +481,8 @@
         },
         error: function (xhr) {
           console.error("❌ Failed to load slots:", xhr.responseText);
+          $("#loadingState").hide();
+          $("#emptyState").show();
         }
       });
 

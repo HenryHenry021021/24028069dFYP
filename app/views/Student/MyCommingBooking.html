@@ -165,11 +165,13 @@
       $("#cancel-teacher").text(teacher);
 
       // 彈出 Modal
-      $("#cancelModal").modal("show");
+      const cancelModal = new bootstrap.Modal(document.getElementById("cancelModal"));
+      cancelModal.show()
     });
 
     $("#confirmCancelBtn").click(function () {
       let bookingId = $(this).data("id");
+      //alert(bookingId);
 
       $.ajax({
         url: "/api/cancelBooking",
@@ -177,7 +179,9 @@
         contentType: "application/json",
         data: JSON.stringify({ booking_id: bookingId }),
         success: function () {
-          $("#cancelModal").modal("hide");
+
+          const cancelModal = new bootstrap.Modal(document.getElementById("cancelModal"));
+          cancelModal.hide()
           alert("Booking cancelled successfully!");
           location.reload();
         },
@@ -190,4 +194,5 @@
   </script>
 
 </body>
+
 </html>

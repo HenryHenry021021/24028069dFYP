@@ -12,17 +12,18 @@ services:
       DB_PORT: 3306
       DB_NAME: CapstoneProject24028069d
       EMAIL_USER: 021021hxc@gmail.com
-      EMAIL_PASS: zatknjnalkvknepy   # 注意去掉空格
+      EMAIL_PASS: hhzuwcmahgpepvmg   # 注意去掉空格
       SMTP_FROM: 021021hxc@gmail.com
       SMTP_SERVER: smtp.gmail.com
       SMTP_PORT: 587
       SMTP_FROM_NAME: FastAPI Service
-      
+      WS_HOST: localhost:8000
+      WS_PATH: /ws
     depends_on:
       - db
     restart: always
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
-
+    # 👇 建議加上 --reload（開發用），自動重新載入
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   db:
     image: mysql:8.0

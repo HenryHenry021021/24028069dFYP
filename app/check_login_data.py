@@ -42,11 +42,18 @@ def check_login_service(email: str, password: str, captcha: str, captcha_email: 
             max_age=3600,     # 1 小时有效
             path="/"
         )
-        role = str(user.get("role_id", "")).lower()
+
+        response.set_cookie(
+            key="role",
+            value=str(user["role_id"]),   # 直接存數字
+            max_age=3600,
+            path="/"
+        )
+        role = str(user["role_id"])
         if role == "2":
             return {"status": "OK", "redirect": "/static/views/Teacher/createTimeSlot.html"}
         elif role == "1":
-            return {"status": "OK", "redirect": "/static/views/Student/studentHome.html"}
+            return {"status": "OK", "redirect": "/static/views/Student/studentViewBookingGroup.html"}
         else:
             return {"status": "OK", "redirect": "dashboard.php"}
     except Exception as e:

@@ -15,7 +15,7 @@ async def get_time_slot_list(request: Request, db: Session = Depends(get_db)):
         SELECT id, title, timeSlotGroupId, start, end, status, teacher_id, content, capacity
         FROM booking_time_slot
         WHERE teacher_id = :teacher_id
-        ORDER BY timeSlotGroupId DESC, start ASC
+        ORDER BY start DESC
     """)
     result = db.execute(stmt, {"teacher_id": teacher_id}).mappings().all()
 

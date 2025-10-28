@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Teacher Home</title>
+    <title>Create Time Slot</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <!-- Bootstrap 5 -->
@@ -11,122 +11,407 @@
     <!-- FullCalendar -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <style>
-        /* FullCalendar 调整 */
-        .fc .fc-timegrid-slot {
-            height: 28px;
-        }
-
-        .fc {
-            --fc-border-color: rgba(0, 0, 0, .06);
-        }
-
-        .fc .fc-day-today {
-            background: rgba(13, 110, 253, .06);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
         }
 
-        /* Booking Form Modal 风格 */
+        .container {
+            max-width: 1200px;
+        }
+
+        /* Header Section */
+        .page-header {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .page-subtitle {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        /* View Controls */
+        .view-controls {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-group .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-group .btn-check:checked + .btn {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .btn-group .btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        /* Navigation Controls */
+        .nav-controls {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-nav {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-nav:hover {
+            background: #e2e8f0;
+            color: #334155;
+            border-color: #cbd5e1;
+        }
+
+        .btn-primary-custom {
+            background: #3b82f6;
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary-custom:hover {
+            background: #2563eb;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Calendar Card */
+        .calendar-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* FullCalendar 调整 */
+        .fc {
+            --fc-border-color: #e2e8f0;
+            --fc-today-bg-color: rgba(59, 130, 246, 0.1);
+            --fc-button-bg-color: #f8fafc;
+            --fc-button-border-color: #e2e8f0;
+            --fc-button-hover-bg-color: #e2e8f0;
+            --fc-button-hover-border-color: #cbd5e1;
+            --fc-button-active-bg-color: #3b82f6;
+            --fc-button-active-border-color: #3b82f6;
+            --fc-event-bg-color: #3b82f6;
+            --fc-event-border-color: #2563eb;
+        }
+
+        .fc .fc-timegrid-slot {
+            height: 32px;
+        }
+
+        .fc .fc-day-today {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .fc .fc-col-header-cell {
+            background: #f8fafc;
+            color: #374151;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .fc .fc-timegrid-slot-label {
+            color: #64748b;
+            font-size: 0.75rem;
+        }
+
+        /* Modal Styles */
         .modal-content {
             border: none;
-            border-radius: 1.25rem;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
         .modal-header {
-            border-top-left-radius: 1.25rem !important;
-            border-top-right-radius: 1.25rem !important;
-            background: linear-gradient(90deg, #a6192e, #c62828);
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 16px 16px 0 0;
+            padding: 1.5rem;
         }
 
-        .modal-header .modal-title,
-        .modal-header .btn-close {
-            color: #fff;
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            border-radius: 0 0 16px 16px;
+            padding: 1.5rem;
+        }
+
+        /* Form Styles */
+        .form-label {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
         }
 
         .form-control,
         .form-select {
-            border-radius: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
         }
 
-        .btn {
-            border-radius: 0.75rem;
-            padding: 0.6rem 1.5rem;
-        }
-
-        .btn-primary {
-            background-color: #a6192e;
-            border-color: #a6192e;
-        }
-
-        .btn-primary:hover {
-            background-color: #8c1627;
-            border-color: #8c1627;
-        }
-
-        .btn-success {
-            background-color: #a6192e;
-            border-color: #a6192e;
-        }
-
-        .btn-success:hover {
-            background-color: #8c1627;
-            border-color: #8c1627;
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .form-label i {
-            margin-right: 6px;
-            color: #a6192e;
+            margin-right: 0.5rem;
+            color: #3b82f6;
+            width: 16px;
+        }
+
+        /* Button Styles */
+        .btn {
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-success {
+            background: #10b981;
+            border-color: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            border-color: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-outline-primary {
+            color: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .btn-outline-primary:hover {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            color: #6b7280;
+            border-color: #d1d5db;
+        }
+
+        .btn-outline-secondary:hover {
+            background: #6b7280;
+            border-color: #6b7280;
+            color: white;
+        }
+
+        /* Time Slot Row */
+        .timeSlotRow {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .timeSlotRow:last-child {
+            margin-bottom: 0;
+        }
+
+        /* File Input */
+        .form-control[type="file"] {
+            padding: 0.5rem;
+        }
+
+        .form-control[type="file"]::-webkit-file-upload-button {
+            background: #f8fafc;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            margin-right: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .form-control[type="file"]::-webkit-file-upload-button:hover {
+            background: #e2e8f0;
+        }
+
+        /* Badge */
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 1.5rem;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .d-flex.justify-content-between {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start !important;
+            }
+            
+            .calendar-card {
+                padding: 1rem;
+            }
+            
+            .modal-dialog {
+                margin: 1rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 
-<body class="bg-light">
+<body>
     <div id="nav-container"></div>
 
     <div class="container py-4" style="margin-top:140px;">
-        <div class="d-flex align-items-end justify-content-between mb-3">
-            <div>
-                <h3 class="mb-1">📅 2025 Semester 1</h3>
-                <div class="text-muted small">Use the controls to navigate and switch views</div>
-            </div>
-
-            <!-- 视图切换 -->
-            <div class="btn-group" role="group" aria-label="View switch">
-                <input type="radio" class="btn-check" name="view" id="view-week" autocomplete="off" checked>
-                <label class="btn btn-outline-primary" for="view-week">Week</label>
-
-                <input type="radio" class="btn-check" name="view" id="view-month" autocomplete="off">
-                <label class="btn btn-outline-primary" for="view-month">Month</label>
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <h1 class="page-title">
+                        <i class="bi bi-calendar-plus me-2"></i>
+                        Create Time Slot
+                    </h1>
+                    <p class="page-subtitle">Schedule and manage your available time slots for students</p>
+                </div>
             </div>
         </div>
 
-        <!-- 导航栏 -->
-        <div class="d-flex gap-2 align-items-center mb-3">
-            <div class="btn-group" role="group" aria-label="Navigation">
-                <button id="btn-prev" type="button" class="btn btn-outline-secondary">‹ Prev</button>
-                <button id="btn-today" type="button" class="btn btn-outline-secondary">Today</button>
-                <button id="btn-next" type="button" class="btn btn-outline-secondary">Next ›</button>
+       
+
+        <!-- Navigation Controls -->
+        <div class="nav-controls">
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+                <div class="btn-group" role="group" aria-label="Navigation">
+                    <button id="btn-prev" type="button" class="btn btn-nav">‹ Prev</button>
+                    <button id="btn-today" type="button" class="btn btn-nav">Today</button>
+                    <button id="btn-next" type="button" class="btn btn-nav">Next ›</button>
+                </div>
+
+                <!-- 打开 Booking Form -->
+                <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#bookingModal">
+                    <i class="bi bi-calendar-plus"></i> 
+                    Open Booking Form
+                </button>
             </div>
-
-            <!-- 打开 Booking Form -->
-            <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#bookingModal">
-                <i class="bi bi-calendar-plus"></i> Open Booking Form
-            </button>
-
         </div>
 
-        <!-- 日历卡片 -->
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div id="calendar"></div>
-            </div>
+        <!-- Calendar Card -->
+        <div class="calendar-card">
+            <div id="calendar"></div>
         </div>
     </div>
 
@@ -135,16 +420,22 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="eventTitle">Event</h5>
+                    <h5 class="modal-title" id="eventTitle">Event Details</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-2">
-                        <span class="badge text-bg-primary" id="eventCourse"></span>
+                    <div class="mb-3">
+                        <span class="badge bg-primary" id="eventCourse"></span>
                     </div>
-                    <div class="mb-1"><strong>Time:</strong> <span id="eventTime"></span></div>
-                    <div class="mb-1"><strong>ID:</strong> <span id="eventId"></span></div>
-                    <div class="mb-1"><strong>Status:</strong> <span id="eventStatus"></span></div>
+                    <div class="mb-2">
+                        <strong>Time:</strong> <span id="eventTime"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>ID:</strong> <span id="eventId"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Status:</strong> <span id="eventStatus"></span>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
@@ -158,26 +449,33 @@
     <div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
-
                 <!-- Header -->
-                <div class="modal-header text-white">
-                    <h5 class="modal-title"><i class="bi bi-calendar-plus"></i> Booking Time Slot</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-calendar-plus me-2"></i> 
+                        Create Time Slot
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <!-- Body -->
-                <div class="modal-body p-4">
+                <div class="modal-body">
                     <form id="timeSlotForm">
                         <div class="row g-4">
                             <!-- Title -->
                             <div class="col-md-6">
-                                <label class="form-label"><i class="bi bi-pencil-square"></i> Title</label>
+                                <label class="form-label">
+                                    <i class="bi bi-pencil-square"></i> 
+                                    Title
+                                </label>
                                 <input type="text" name="title" class="form-control" placeholder="Enter title" required>
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label"><i class="bi bi-check-circle"></i> Status</label>
+                                <label class="form-label">
+                                    <i class="bi bi-check-circle"></i> 
+                                    Status
+                                </label>
                                 <select class="form-select" name="status">
                                     <option value="Available">Available</option>
                                     <option value="Unavailable">Unavailable</option>
@@ -188,12 +486,18 @@
                             <div id="timeSlotContainer">
                                 <div class="row g-4 timeSlotRow">
                                     <div class="col-md-6">
-                                        <label class="form-label"><i class="bi bi-clock"></i> Start Time</label>
+                                        <label class="form-label">
+                                            <i class="bi bi-clock"></i> 
+                                            Start Time
+                                        </label>
                                         <input type="datetime-local" name="start" class="form-control" required>
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="form-label"><i class="bi bi-clock-history"></i> End Time</label>
+                                        <label class="form-label">
+                                            <i class="bi bi-clock-history"></i> 
+                                            End Time
+                                        </label>
                                         <input type="datetime-local" name="end" class="form-control" required>
                                     </div>
                                 </div>
@@ -202,43 +506,64 @@
                             <!-- Add Button -->
                             <div class="mt-3">
                                 <button type="button" id="addTimeSlotBtn" class="btn btn-outline-primary">
-                                    <i class="bi bi-plus-circle"></i> Add Another Time Slot
+                                    <i class="bi bi-plus-circle me-2"></i> 
+                                    Add Another Time Slot
                                 </button>
                             </div>
 
-                            <!-- Status -->
-
-
                             <!-- Capacity -->
-                            <div class="col-md-6">
-                                <label class="form-label"><i class="bi bi-people" name="capacity"></i> Capacity</label>
-                                <input type="number" class="form-control" placeholder="Enter capacity" name="capacity"
-                                    required>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">
+                                        <i class="bi bi-people"></i> 
+                                        Capacity
+                                    </label>
+                                    <input type="number" class="form-control" placeholder="Enter capacity" name="capacity" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">
+                                        <i class="bi bi-hourglass-split"></i> 
+                                        Deadline
+                                    </label>
+                                    <input type="datetime-local" name="deadline" class="form-control" required>
+                                </div>
                             </div>
 
                             <!-- Content -->
                             <div class="col-12">
-                                <label class="form-label"><i class="bi bi-file-text"></i> Content</label>
-                                <textarea class="form-control" rows="3" name="content" placeholder="Enter description"
-                                    required></textarea>
+                                <label class="form-label">
+                                    <i class="bi bi-file-text"></i> 
+                                    Content
+                                </label>
+                                <textarea class="form-control" rows="3" name="content" placeholder="Enter description" required></textarea>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-file-earmark-excel"></i> 
+                                    Upload Student ID Excel
+                                </label>
+                                <input type="file" id="studentExcel" name="student_file" class="form-control" accept=".xlsx,.xls" required>
                             </div>
 
                             <!-- Buttons -->
                             <div class="col-12 text-center mt-3">
                                 <button type="submit" class="btn btn-success me-2">
-                                    <i class="bi bi-save"></i> Save
+                                    <i class="bi bi-save me-2"></i> 
+                                    Save
                                 </button>
                                 <button type="reset" class="btn btn-outline-secondary">
-                                    <i class="bi bi-x-circle"></i> Reset
+                                    <i class="bi bi-x-circle me-2"></i> 
+                                    Reset
                                 </button>
                             </div>
                         </div>
                     </form>
                 </div>
-
             </div>
         </div>
     </div>
+
     <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js"></script>
@@ -249,49 +574,12 @@
             }
         });
         $(document).ready(function () {
-            // 格式化日期为 datetime-local 需要的格式 (YYYY-MM-DDTHH:MM)
-            function toDatetimeLocal(d) {
+            // ✅ 格式化成 MySQL datetime
+            function formatDateForMySQL(date) {
                 const pad = (n) => n.toString().padStart(2, "0");
-                return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
+                    `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
             }
-
-
-
-
-            // 今天
-            const now = new Date();
-            const minDateTime = toDatetimeLocal(now);
-
-            // 七天后
-            const future = new Date();
-            future.setDate(future.getDate() + 6);
-            const maxDateTime = toDatetimeLocal(future);
-
-            // Start input
-            $("#startTime").val(minDateTime).attr("min", minDateTime).attr("max", maxDateTime);
-
-            // End input
-            $("#endTime").val(minDateTime).attr("min", minDateTime).attr("max", maxDateTime);
-
-            // ✅ 实时检测结束时间
-            $("#startTime, #endTime").on("input change", function () {
-                const startVal = new Date($("#startTime").val());
-                const endVal = new Date($("#endTime").val());
-
-                if (endVal <= startVal) {
-                    alert("endtime cannot be more than start time");
-                    // 设置 end = start + 1 小时
-                    const newEnd = new Date(startVal.getTime() + 60 * 60 * 1000);
-                    let y = newEnd.getFullYear();
-                    let m = String(newEnd.getMonth() + 1).padStart(2, '0');
-                    let d = String(newEnd.getDate()).padStart(2, '0');
-                    let hh = String(newEnd.getHours()).padStart(2, '0');
-                    let mm = String(newEnd.getMinutes()).padStart(2, '0');
-                    $("#endTime").val(`${y}-${m}-${d}T${hh}:${mm}`);
-                } else {
-                    $("#endTime")[0].setCustomValidity(""); // 清除错误
-                }
-            });
 
             function isOverlap(start1, end1, start2, end2) {
                 return (start1 < end2 && start2 < end1);
@@ -321,20 +609,53 @@
                     }
                 }
 
-                // ✅ 如果沒問題，才送 Ajax
-                $.ajax({
-                    url: "/api/createTimeSlot",
-                    type: "POST",
-                    data: $(this).serialize(),
-                    success: function (res) {
-                        alert(res.message);
-                    },
-                    error: function (xhr, status, error) {
-                        alert("保存失败 ❌: " + error);
-                    }
-                });
-            });
+                // 讀 Excel → 傳陣列
+                const file = document.getElementById("studentExcel").files[0];
+                if (!file) {
+                    alert("請先選擇 Excel 檔案！");
+                    return;
+                }
 
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const data = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(data, { type: "array" });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+
+                    const rows = XLSX.utils.sheet_to_json(worksheet);
+                    const studentIds = rows.map(r => r.studentid); // 假設 Excel 欄位叫 studentid
+
+                    // 整理要送的 FormData
+                    const formData = new FormData();
+                    formData.append("title", $("input[name='title']").val());
+                    formData.append("status", $("select[name='status']").val());
+                    formData.append("capacity", $("input[name='capacity']").val());
+                    formData.append("content", $("textarea[name='content']").val());
+                    formData.append("deadline", formatDateForMySQL(new Date($("input[name='deadline']").val())));
+
+                    // ✅ 格式化 slot datetime
+                    starts.forEach((s, i) => {
+                        formData.append("start", formatDateForMySQL(starts[i]));
+                        formData.append("end", formatDateForMySQL(ends[i]));
+                    });
+
+                    // 多個學生
+                    studentIds.forEach(sid => formData.append("students", sid));
+
+                    fetch("/api/createTimeSlot", {
+                        method: "POST",
+                        body: formData,
+                        keepalive: true   // ✅ 確保跳頁後仍會送到
+                    });
+                    alert("✅ Create success!");
+                    window.location.href = "ViewTimeSlotList.html";
+
+
+                };
+
+                reader.readAsArrayBuffer(file);
+            });
         });
 
         $(function () {
@@ -439,25 +760,7 @@
                 }
             });
 
-            // 点击 Reserve 按钮
-            $(".reserveBtn").on("click", function () {
-                const timeSlotId = $(this).val(); // 从按钮取 id
 
-                $.ajax({
-                    url: "/api/reserveTimeSlot",
-                    method: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify({ time_slot_id: timeSlotId }), // ✅ 直接对象，不是数组
-                    success: function (resp) {
-                        console.log("✅ Reservation success:", resp);
-                        alert("Reservation success!");
-                    },
-                    error: function (xhr) {
-                        console.error("❌ Reservation failed:", xhr.responseText);
-                        alert("Reservation failed!");
-                    }
-                });
-            });
             $("#addTimeSlotBtn").on("click", function () {
                 const newRow = `
                         <div class="row g-4 timeSlotRow mt-2">
@@ -472,8 +775,6 @@
                         </div>`;
                 $("#timeSlotContainer").append(newRow);
             });
-
-
 
 
 

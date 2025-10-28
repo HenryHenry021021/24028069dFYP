@@ -29,14 +29,13 @@ async def get_student_list_by_time_slot_id(
             students_booking.student_id,
             users.full_name AS student_name,
             users.email,
-            users.year_of_study,
             students_booking.priority,
             students_booking.status
         FROM students_booking
         INNER JOIN users 
             ON students_booking.student_id = users.id
         WHERE students_booking.time_slot_id = :time_slot_id
-        AND students_booking.status = 'Matched'
+        AND students_booking.status = 'Booked'
         ORDER BY students_booking.priority ASC
     """)
 
@@ -49,7 +48,6 @@ async def get_student_list_by_time_slot_id(
             "student_id": r["student_id"],
             "student_name": r["student_name"],
             "email": r["email"],
-            "year_of_study": r["year_of_study"],
             "priority": r["priority"],
             "status": r["status"]
         }

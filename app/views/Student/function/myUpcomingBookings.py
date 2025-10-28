@@ -11,7 +11,7 @@ async def get_my_upcoming_bookings(request: Request, db: Session = Depends(get_d
     """
     查詢今天 & 未來的 booking（JOIN booking_time_slot, users）
     """
-    student_id = 1
+    student_id = request.cookies.get("user_id")
     if not student_id:
         raise HTTPException(status_code=401, detail="Not logged in")
 
